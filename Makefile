@@ -6,6 +6,7 @@ SRCS := $(wildcard src/*.c)
 OBJS := $(patsubst src/%.c,obj/%.o,$(SRCS))
 
 tp1: $(OBJS)
+	$(CC) $(OBJS) -o tp1
 
 obj/%.o: src/%.c
 	@mkdir -p obj
