@@ -1,6 +1,7 @@
 #ifndef __ARTIST_ANT_H__
 #define __ARTIST_ANT_H__
 
+#include <stdint.h>
 #include <unistd.h>
 
 #include "ant_constants.h"

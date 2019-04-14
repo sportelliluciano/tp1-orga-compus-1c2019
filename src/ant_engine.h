@@ -3,6 +3,7 @@
 
 #include <stdio.h>
 #include <unistd.h>
+#include <stdint.h>
 
 void* paint(void *ant, void *grid, void *palette, void *rules,  uint32_t iterations);
 
