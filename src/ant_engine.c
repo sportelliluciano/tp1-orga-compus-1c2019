@@ -12,48 +12,49 @@ typedef uint32_t uintvector_t;
 // Gets the length of a uintvector_t*
 #define UINTV_LEN(intv) (*(intv - 1))
 
-
-static void make_rules_map(int rules_map[256], uintvector_t* palette, uintvector_t *rules) {
-  for (uint32_t i=0; i<UINTV_LEN(palette); i++) {
-    rules_map[palette[i]] = rules[i];
-  }
-}
+#define X 0
+#define Y 1
 
 void*
 paint(void *ant, void *grid, void *palette, void *rules,  uint32_t iterations)
 {
+  char *rules_str = rules;
   ant_t *sant = ant;
   square_grid_t *sgrid = grid;
 
   orientation_t orientation[] = {ON, OE, OS, OW};
   int current_orientation = 0;
 
-  int increments[4][2] = { {0, 1}, {1, 0}, {0, -1}, {-1, 0} };
+  int increments[4][2] = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
 
   uintvector_t *colours = palette;
   uint32_t colour_idx = 1;
 
   int rules_map[256];
-  make_rules_map(rules_map, palette, rules);
+  for (uint32_t i=0; i<UINTV_LEN(colours); i++) {
+    rules_map[colours[i]] = rules_str[i];
+  }
   
   for (uint32_t i = 0; i < iterations; i++, colour_idx++) {
+    colour_t current_colour = sgrid->grid[sant->y][sant->x];
+    
     if (colour_idx >= UINTV_LEN(colours))
       colour_idx = 0;
-    
-    colour_t current_colour = colours[colour_idx];
+    colour_t next_colour = colours[colour_idx];
 
     // Change orientation
     current_orientation = (current_orientation + rules_map[current_colour]) % 4;
     sant->o = orientation[current_orientation];
-    
+
     // Paint the cell
-    sgrid->grid[sant->y][sant->x] = current_colour;
+    sgrid->grid[sant->y][sant->x] = next_colour;
     
     // Move to next cell
-    sant->x += increments[current_orientation][0];
-    sant->y += increments[current_orientation][1];
-    
-    if (sant->x > sgrid->width) // Check boundaries
+    sant->x += increments[current_orientation][X];
+    sant->y += increments[current_orientation][Y];
+
+    // Check boundaries
+    if (sant->x > sgrid->width) 
       sant->x = 0;
     else if (sant->x == (uint32_t)-1) // sant->x is unsigned > check overflow
       sant->x = sgrid->width - 1;
@@ -95,7 +96,7 @@ make_rules(char *spec)
 {
   uintvector_t* rules = str_to_uintvector(spec);
   for (uint32_t i=0;i<UINTV_LEN(rules);i++) {
-    rules[i] = (rules[i] == 'L') ? 1:3;
+    rules[i] = (rules[i] == 'L') ? 3:1;
   }
   return rules;
 }
