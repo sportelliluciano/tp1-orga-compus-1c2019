@@ -9,59 +9,97 @@
 
 typedef uint32_t uintvector_t;
 
+// Gets the length, in elements, of an array.
+#define array_size(a) (sizeof(a) / sizeof(a[0]))
+
 // Gets the length of a uintvector_t*
 #define UINTV_LEN(intv) (*(intv - 1))
 
 #define X 0
 #define Y 1
 
+#ifdef DEBUG_PRINT
+const char *strcolour(colour_t col) {
+  switch(col) {
+    case RED:
+      return "RED";
+    case BLUE:
+      return "BLUE";
+    case GREEN:
+      return "GREEN";
+    case YELLOW: 
+      return "YELLOW";
+    case BLACK:
+      return "BLACK";
+    case WHITE:
+      return "WHITE";
+    default:
+      return "WTF MAN";
+  }
+}
+
+const char *strorientation(orientation_t ori) {
+  switch(ori) {
+    case NORTH:
+      return "NORTH";
+    case SOUTH:
+      return "SOUTH"; 
+    case EAST:
+      return "EAST";
+    case WEST:
+      return "WEST";
+    default:
+      return "WTFFFFF MAN";
+  }
+}
+#endif
+
 void*
 paint(void *ant, void *grid, void *palette, void *rules,  uint32_t iterations)
 {
-  char *rules_str = rules;
   ant_t *sant = ant;
   square_grid_t *sgrid = grid;
 
   orientation_t orientation[] = {ON, OE, OS, OW};
   int current_orientation = 0;
 
-  int increments[4][2] = {{0, 1}, {1, 0}, {0, -1}, {-1, 0}};
+  int increments[array_size(orientation)][2] = {
+    {0, sgrid->height - 1}, // ON
+    {1, 0},                 // OE
+    {0, 1},                 // OS
+    {sgrid->width - 1, 0}   // OW
+  };
 
   uintvector_t *colours = palette;
-  uint32_t colour_idx = 1;
+  uintvector_t *urules = rules;
 
-  int rules_map[256];
+  int rules_map[10];
   for (uint32_t i=0; i<UINTV_LEN(colours); i++) {
-    rules_map[colours[i]] = rules_str[i];
+    rules_map[colours[i]] = urules[i];
   }
   
-  for (uint32_t i = 0; i < iterations; i++, colour_idx++) {
-    colour_t current_colour = sgrid->grid[sant->y][sant->x];
-    
-    if (colour_idx >= UINTV_LEN(colours))
-      colour_idx = 0;
-    colour_t next_colour = colours[colour_idx];
+  for (uint32_t i = 0; i < iterations; i++) {
+    colour_t current_colour = sgrid->grid[sant->x][sant->y];
+    uint32_t current_turn = rules_map[current_colour];
+    colour_t next_colour = colours[(i + 1) % UINTV_LEN(colours)];
 
     // Change orientation
-    current_orientation = (current_orientation + rules_map[current_colour]) % 4;
+    current_orientation = (current_orientation + current_turn) % array_size(orientation);
     sant->o = orientation[current_orientation];
 
     // Paint the cell
-    sgrid->grid[sant->y][sant->x] = next_colour;
-    
-    // Move to next cell
-    sant->x += increments[current_orientation][X];
-    sant->y += increments[current_orientation][Y];
+    sgrid->grid[sant->x][sant->y] = next_colour;
 
-    // Check boundaries
-    if (sant->x > sgrid->width) 
-      sant->x = 0;
-    else if (sant->x == (uint32_t)-1) // sant->x is unsigned > check overflow
-      sant->x = sgrid->width - 1;
-    if (sant->y > sgrid->height)
-      sant->y = 0;
-    else if (sant->y == (uint32_t)-1)
-      sant->y = sgrid->height - 1;
+#ifdef DEBUG_PRINT
+    printf("ant is in (%d, %d), old colour: %s, orientation: %s; painted: %s\n",
+      sant->x, sant->y, strcolour(current_colour), 
+      strorientation(sant->o), 
+      strcolour(sgrid->grid[sant->x][sant->y]));
+#endif
+
+    // Move to next cell
+    sant->x = (sant->x + increments[current_orientation][X]) % sgrid->width;
+    sant->y = (sant->y + increments[current_orientation][Y]) % sgrid->height;
   }
 
   return grid;
