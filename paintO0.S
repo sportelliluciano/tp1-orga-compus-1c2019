@@ -85,7 +85,7 @@
 #
 # #############################################################################
 paint:
-		    addiu   $sp,$sp,-SS             # Create the stack frame
+            addiu   $sp,$sp,-SS             # Create the stack frame
 		    
             # Set up ABA and load fifth argument into registers
             sw      $a0,O_ARG0($sp)         # Store $a0 in the ABA
@@ -169,7 +169,16 @@ paint:
             addiu   $t6,$t6,$a2             #   $t6 = colours + ((index + 1) % palette_size)
             lw      $t6,0($t6)              #   $t6 = colours[(index + 1) % palette_size]
 
-            # ----- completar acá ----- #
+            # Update current orientation in $v1
+            addu    $v1,$v1,$t5             #   $v1 = current_orientation + current_turn
+            addiu   $t7,$zero,N_ORIENTATIONS #  $t7 = N_ORIENTATIONS
+            rem     $v1,$v1,$t7             #   $v1 = (current_orientation + current_turn) % N_ORIENTATIONS
+            
+            # Store current orientaion in sant->o
+            sll     $t7,$v1,2               #   $t7 = current_orientation * 4
+            
+            # ---- completar aca ----
+
 
 
     	    addi    $t8,$zero,1             # colour_idx=1
