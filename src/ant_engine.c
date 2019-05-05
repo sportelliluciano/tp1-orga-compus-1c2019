@@ -9,6 +9,12 @@
 
 typedef uint32_t uintvector_t;
 
+// Maximum number a colour_t may be
+#define MAX_COLOUR 5
+
+// Number of possible orientations
+#define N_ORIENTATIONS 4
+
 // Gets the length, in elements, of an array.
 #define array_size(a) (sizeof(a) / sizeof(a[0]))
 
@@ -54,15 +60,18 @@ const char *strorientation(orientation_t ori) {
 }
 #endif
 
+#ifndef ASSEMBLY_PAINT
+
 void*
 paint(void *ant, void *grid, void *palette, void *rules,  uint32_t iterations)
 {
   ant_t *sant = ant;
   square_grid_t *sgrid = grid;
+  uintvector_t *colours = palette;
+  uintvector_t *urules = rules;
 
-  orientation_t orientation[] = {ON, OE, OS, OW};
   int current_orientation = 0;
-
+  orientation_t orientation[] = {ON, OE, OS, OW};
   int increments[array_size(orientation)][2] = {
     {0, sgrid->height - 1}, // ON
     {1, 0},                 // OE
@@ -70,10 +79,7 @@ paint(void *ant, void *grid, void *palette, void *rules,  uint32_t iterations)
     {sgrid->width - 1, 0}   // OW
   };
 
-  uintvector_t *colours = palette;
-  uintvector_t *urules = rules;
-
-  int rules_map[10];
+  int rules_map[MAX_COLOUR + 1];
   for (uint32_t i=0; i<UINTV_LEN(colours); i++) {
     rules_map[colours[i]] = urules[i];
   }
@@ -105,6 +111,13 @@ paint(void *ant, void *grid, void *palette, void *rules,  uint32_t iterations)
   return grid;
 }
 
+#endif
+
+/**
+ * Creates a vector of unsigned ints from a pipe separated string.
+ * 
+ * Ex: "A|B|C" -> {'A', 'B', 'C'}.
+ */
 static uintvector_t* str_to_uintvector(char *str) {
   uint32_t n_chars = 0, n_data = 0;
   while (str[n_chars]) {
@@ -134,7 +147,7 @@ make_rules(char *spec)
 {
   uintvector_t* rules = str_to_uintvector(spec);
   for (uint32_t i=0;i<UINTV_LEN(rules);i++) {
-    rules[i] = (rules[i] == 'L') ? 3:1;
+    rules[i] = (rules[i] == 'L') ? (N_ORIENTATIONS - 1):1;
   }
   return rules;
 }
