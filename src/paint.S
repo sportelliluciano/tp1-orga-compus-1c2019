@@ -13,9 +13,11 @@
 #define SZ_ORIENTATION (4 * N_ORIENTATIONS)
 # int increments[N_ORIENTATIONS][2] size, in bytes
 #define SZ_INCREMENTS (4 * 2 * N_ORIENTATIONS)
+#define SZ_FP 4
+#define SZ_GP 4
 
 # Stack size
-#define SS (SZ_RULESMAP + SZ_ORIENTATION + SZ_INCREMENTS)
+#define SS (SZ_RULESMAP + SZ_ORIENTATION + SZ_INCREMENTS + SZ_FP + SZ_GP)
 
 # Offset to each argument in the ABA
 #define O_ARG0(sp) (SS + 0)(sp)
@@ -23,6 +25,10 @@
 #define O_ARG2(sp) (SS + 8)(sp)
 #define O_ARG3(sp) (SS + 12)(sp)
 #define O_ARG4(sp) (SS + 16)(sp)
+
+# Offset to fp and gp
+#define O_FP (SS-4)(sp)
+#define O_GP (SS-8)(sp)
  
 # Offset to the rules map (index, reg)
 #define O_RULESMAP_START    (SS - SZ_RULESMAP)
@@ -60,6 +66,8 @@
 #  [SS - O_RULES_MAP]   => int rules_map[MAX_COLOURS]
 #  [SS - O_ORIENTATION] => orientation_t orientation[N_ORIENTATIONS]
 #  [SS - O_INCREMENTS]  => int increments[N_ORIENTATIONS][2]
+#  [SS - O_GP]
+#  [SS - O_FP] 
 #
 # Register usage:
 #  -- Arguments --
@@ -96,6 +104,10 @@ paint:
         sw      $a2,O_ARG2($sp)         # Store $a2 in the ABA
         sw      $a3,O_ARG3($sp)         # Store $a3 in the ABA
         lw      $v0,O_ARG4($sp)         # Load fifth argument (iterations)
+	
+	# Store fp and gp
+	sw	$fp,O_FP($sp)		# Store fp in the ABA
+	sw	$gp,O_GP($sp)		# Store gp in the ABA
         
         # Load locals from function scope into registers
         add     $v1,$zero,0                   # current_orientation = 0
