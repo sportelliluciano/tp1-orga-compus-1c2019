@@ -186,7 +186,7 @@ void grid_out()
   for (unsigned int i = 0;  i < grid_width; i++) {
     for (unsigned int j = 0;  j < grid_height; j++) {
 
-      c = grid.grid[i][j];
+      c = grid.grid[j][i];
 
       switch(c) {
         case RED:

@@ -27,8 +27,8 @@
 #define O_ARG4(sp) (SS + 16)(sp)
 
 # Offset to fp and gp
-#define O_FP (SS-4)(sp)
-#define O_GP (SS-8)(sp)
+#define O_FP(sp) (SS-4)(sp)
+#define O_GP(sp) (SS-8)(sp)
  
 # Offset to the rules map (index, reg)
 #define O_RULESMAP_START    (SS - SZ_RULESMAP)
