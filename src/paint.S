@@ -31,7 +31,7 @@
 #define O_GP(sp) (SS-8)(sp)
  
 # Offset to the rules map (index, reg)
-#define O_RULESMAP_START    (SS - SZ_RULESMAP)
+#define O_RULESMAP_START    (SS - SZ_RULESMAP - SZ_FP - SZ_GP)
 #define O_RULESMAP(idx, sp) (O_RULES_MAP + 4 * idx)(sp)
 
 # Offset to the orientations array (index, reg)
@@ -110,19 +110,19 @@ paint:
 	sw	$gp,O_GP($sp)		# Store gp in the ABA
         
         # Load locals from function scope into registers
-        add     $v1,$zero,0                   # current_orientation = 0
-        add     $t0,$sp,O_ORIENTATION_START   # Load orientation address
-        add     $t1,$sp,O_INCREMENTS_START    # Load increments address
-        add     $t2,$sp,O_RULESMAP_START      # Load rules map address
+        addiu   $v1,$zero,0                   # current_orientation = 0
+        addiu   $t0,$sp,O_ORIENTATION_START   # Load orientation address
+        addiu   $t1,$sp,O_INCREMENTS_START    # Load increments address
+        addiu   $t2,$sp,O_RULESMAP_START      # Load rules map address
 
         # Build orientation array
-        add     $t7,$zero,ON                # Copy ON constant to $t7
+        addiu   $t7,$zero,ON                # Copy ON constant to $t7
         sw      $t7,O_ORIENTATION(0,$sp)    # Store $t7 in orientation[0]
-        add     $t7,$zero,OE
+        addiu   $t7,$zero,OE
         sw      $t7,O_ORIENTATION(1,$sp)
-        add     $t7,$zero,OS
+        addiu   $t7,$zero,OS
         sw      $t7,O_ORIENTATION(2,$sp)
-        add     $t7,$zero,OW
+        addiu   $t7,$zero,OW
         sw      $t7,O_ORIENTATION(3,$sp)
 
         # Build increments array
@@ -130,7 +130,7 @@ paint:
         addiu   $t7,$t7,-1                   # $t7 = width - 1
         lw      $t8,O_HEIGHT($a1)            # Load height into $t8            
         addiu   $t8,$t8,-1                   # $t8 = height - 1
-        add     $t9,$zero,1                  # $t9 = 1
+        addiu   $t9,$zero,1                  # $t9 = 1
         sw      $zero,O_INCREMENTS(ON,X,$sp) # { {0,
         sw      $t8,  O_INCREMENTS(ON,Y,$sp) #    height - 1},
         sw      $t9,  O_INCREMENTS(OE,X,$sp) #   {1,
@@ -141,11 +141,11 @@ paint:
         sw      $zero,O_INCREMENTS(OW,Y,$sp) #    0} }
 
         # Build rules map array
-        add     $t3,$zero,0             # index = 0
+        addiu   $t3,$zero,0             # index = 0
         lw      $t4,O_UIVLEN($a2)       # Load palette size into $t4
     rules_loop:
         beq     $t3,$t4,rules_loop_end  # while ($t3 != $t4) {
-        add     $t5,$t3,0               #   $t5 = index
+        addiu   $t5,$t3,0               #   $t5 = index
         sll     $t5,2                   #   $t5 = index * 4
         add     $t6,$a2,$t5             #   $t6 = (index * 4) + palette
         add     $t7,$a3,$t5             #   $t7 = (index * 4) + rules
